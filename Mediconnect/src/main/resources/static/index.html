@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediConnect Dashboard</title>
+    <style>
+        /* Basic Styling */
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background-color: #f8f9fa; }
+        h1, h2, h3 { color: #343a40; }
+        h1 { text-align: center; margin-bottom: 30px; }
+
+        /* Navigation Bar */
+        .navbar { display: flex; background-color: #343a40; padding: 10px; border-radius: 8px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .navbar button { background: none; border: none; color: #f8f9fa; padding: 12px 20px; font-size: 16px; cursor: pointer; transition: background 0.3s; border-radius: 5px; margin-right: 5px; }
+        .navbar button:hover { background-color: #495057; }
+        .navbar button.active { background-color: #007bff; font-weight: bold; }
+
+        /* Sections & Forms */
+        .module-section { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .form-container { background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.05); margin-bottom: 30px; border: 1px solid #e9ecef; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #495057; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 5px; font-size: 15px; box-sizing: border-box; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; }
+        input:focus, select:focus { border-color: #80bdff; outline: 0; box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); }
+
+        /* Buttons */
+        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; font-weight: 500; transition: all 0.2s; }
+        .btn-success { background-color: #28a745; color: white; } .btn-success:hover { background-color: #218838; }
+        .btn-primary { background-color: #007bff; color: white; } .btn-primary:hover { background-color: #0069d9; }
+        .btn-danger { background-color: #dc3545; color: white; padding: 6px 12px; font-size: 14px; } .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background-color: #6c757d; color: white; } .btn-secondary:hover { background-color: #5a6268; }
+
+        /* Tables */
+        .table-container { overflow-x: auto; background: #fff; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #e9ecef; }
+        th { background-color: #007bff; color: white; font-weight: 600; }
+        tr:hover { background-color: #f1f3f5; }
+    </style>
+</head>
+<body>
+
+    <h1>🏥 MediConnect Dashboard</h1>
+
+    <div class="navbar">
+        <button id="nav-patient" class="active" onclick="showSection('patient')">👨‍💼 Patients</button>
+        <button id="nav-doctor" onclick="showSection('doctor')">👨‍⚕️ Doctors</button>
+        <button id="nav-appointment" onclick="showSection('appointment')">📅 Appointments</button>
+    </div>
+
+    <div id="patient-section" class="module-section" style="display:block;">
+        <h2>Manage Patients</h2>
+        <div class="form-container">
+            <h3 id="patientFormTitle">Add New Patient</h3>
+            <form id="patientForm">
+                <input type="hidden" id="patientId">
+                <div class="form-group">
+                    <label>Name:</label>
+                    <input type="text" id="patientName" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label>Age:</label>
+                    <input type="number" id="patientAge" required placeholder="Enter age">
+                </div>
+                <div class="form-group">
+                    <label>Gender:</label>
+                    <select id="patientGender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success" id="patientSubmitBtn">Add Patient</button>
+                <button type="button" class="btn btn-secondary" id="patientCancelBtn" style="display:none;">Cancel</button>
+            </form>
+        </div>
+        <div class="table-container">
+            <table id="patientsTable">
+                <thead><thead>
+    <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Specialization</th>
+        <th>Qualification</th>
+        <th>Timing</th> <th>Actions</th>
+    </tr>
+ </thead>
+  <tr><th>ID</th><th>Name</th><th>Age</th><th>Gender</th><th>Actions</th></tr> 
+  </thead>
+                <tbody id="patientsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="doctor-section" class="module-section">
+        <h2>Manage Doctors</h2>
+        <div class="form-container">
+            <h3>Add New Doctor</h3>
+            <form id="doctorForm">
+                <div class="form-group">
+                    <label>Doctor Name:</label>
+                    <input type="text" id="doctorName" required placeholder="e.g., Dr. Sharma">
+                </div>
+                <div class="form-group">
+                    <label>Specialization (Category):</label>
+                    <select id="doctorCategory" required>
+                        <option value="">Loading categories...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Qualification:</label>
+                    <input type="text" id="doctorQualification" required placeholder="e.g., MBBS, MD">
+                </div>
+                <button type="submit" class="btn btn-success">Add Doctor</button>
+            </form>
+        </div>
+        <div class="table-container">
+            <table id="doctorsTable">
+                <thead><tr><th>ID</th><th>Name</th><th>Specialization</th><th>Qualification</th><th>Actions</th></tr></thead>
+                <tbody id="doctorsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="appointment-section" class="module-section">
+        <h2>Manage Appointments</h2>
+        <div class="form-container">
+            <h3>Book Appointment</h3>
+            <form id="appointmentForm">
+                <div class="form-group">
+                    <label>Select Patient:</label>
+                    <select id="appointmentPatient" required>
+                        <option value="">Loading patients...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Select Doctor:</label>
+                    <select id="appointmentDoctor" required>
+                        <option value="">Loading doctors...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Date:</label>
+                    <input type="date" id="appointmentDate" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Book Appointment</button>
+                <div class="form-group">
+    <label>Qualification:</label>
+    <input type="text" id="doctorQualification" required placeholder="e.g., MBBS, MD">
+</div>
+
+<div class="form-group">
+    <label>Timing From:</label>
+    <input type="time" id="doctorTimingFrom" required>
+</div>
+<div class="form-group">
+    <label>Timing To:</label>
+    <input type="time" id="doctorTimingTo" required>
+</div>
+            </form>
+        </div>
+        <div class="table-container">
+            <table id="appointmentsTable">
+                <thead><tr><th>ID</th><th>Patient Name</th><th>Doctor Name</th><th>Date</th><th>Status</th></tr></thead>
+                <tbody id="appointmentsTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
