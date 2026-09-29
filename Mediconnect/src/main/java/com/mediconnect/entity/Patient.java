@@ -18,8 +18,12 @@ public class Patient {
     private int age;
     private String gender;
 
-    // --- Getters and Setters ---
-    // (Eclipse inhe automatically generate kar sakta hai)
+    @jakarta.persistence.OneToOne
+    @jakarta.persistence.JoinColumn(name = "user_id")
+    private User user;
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public Long getId() {
         return id;

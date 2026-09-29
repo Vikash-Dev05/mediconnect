@@ -6,6 +6,6 @@ import org.springframework.stereotype.Repository;
 import com.mediconnect.entity.Patient;
 
 @Repository
-public interface PatientRepository extends JpaRepository<Patient, Long> {
-    // Bas! Abhi ke liye itna hi.
+public interface PatientRepository extends JpaRepository<Patient, Long>{
+
 }

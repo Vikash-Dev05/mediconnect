@@ -1,67 +1,56 @@
 package com.mediconnect.controller;
 
-import java.util.List;
-
+import com.mediconnect.entity.User;
+import com.mediconnect.entity.AppointmentSlot;
+import com.mediconnect.entity.Doctor;
+import com.mediconnect.repository.AppointmentSlotRepository;
+import com.mediconnect.service.DoctorService;
+import com.mediconnect.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-import com.mediconnect.entity.Patient;
-import com.mediconnect.repository.PatientRepository;
-
-@RestController
-@RequestMapping("/api/patients")
+@Controller
+@RequestMapping("/patient")
 public class PatientController {
 
     @Autowired
-    private PatientRepository patientRepository;
+    private DoctorService doctorService;
+    
+    @Autowired
+    private UserService userService;
 
-    // 1. API to create a new patient (CREATE)
-    @PostMapping("/add")
-    public Patient createPatient(@RequestBody Patient patient) {
-        return patientRepository.save(patient);
-    }
+    @Autowired
+    private AppointmentSlotRepository slotRepository;
 
-    // 2. API to get all patients (READ)
-    @GetMapping("/all")
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
-    }
 
-    // 3. API to update a patient by ID (UPDATE)
-    @PutMapping("/update/{id}")
-    public Patient updatePatient(@PathVariable Long id, @RequestBody Patient patientDetails) {
+    @GetMapping("/dashboard")
+    public String patientDashboard(Model model, @RequestParam(name = "specialization", required = false) String specialization, Principal principal) {
+
+        String identifier = principal.getName();
+        User user = userService.findUserByEmailOrPhone(identifier);
+        model.addAttribute("user", user);
+
+        List<Doctor> doctors;
+        if (specialization != null && !specialization.isEmpty()) {
+            doctors = doctorService.searchDoctors(specialization);
+        } else {
+            doctors = doctorService.getAllDoctors();
+        }
+        model.addAttribute("doctors", doctors);
+
+        // Fetch all available slots and group by doctor ID
+        List<AppointmentSlot> allAvailableSlots = slotRepository.findByStatus("Available");
+        Map<Long, List<AppointmentSlot>> slotsByDoctor = allAvailableSlots.stream()
+                .collect(Collectors.groupingBy(slot -> slot.getDoctor().getId()));
         
-        // Pehle database se purana patient dhoondo
-        Patient existingPatient = patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
+        model.addAttribute("slotsMap", slotsByDoctor);
 
-        // Nayi details ko purane par set karo
-        existingPatient.setName(patientDetails.getName());
-        existingPatient.setAge(patientDetails.getAge());
-        existingPatient.setGender(patientDetails.getGender());
-
-        // Updated patient ko save kar do
-        return patientRepository.save(existingPatient);
-    }
-
-    // 4. API to delete a patient by ID (DELETE)
-    @DeleteMapping("/delete/{id}")
-    public String deletePatient(@PathVariable Long id) {
-        
-        // Pehle check karo ki woh ID hai ya nahi
-        patientRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Patient not found with id: " + id));
-        
-        // Agar mil gaya, toh delete karo
-        patientRepository.deleteById(id);
-        
-        return "Patient deleted successfully with id: " + id;
+        return "patient_dashboard"; // HTML page ka naam
     }
 }

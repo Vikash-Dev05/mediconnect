@@ -12,15 +12,15 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false) // Naam unique hona chahiye
-    private String name; // e.g., "Cardiologist", "Dentist"
+    @Column(unique = true, nullable = false)
+    private String name;
 
-    // Ek Category ke bahut saare Doctors ho sakte hain
+
     @OneToMany(mappedBy = "category")
-    @JsonIgnore // Infinite loop rokne ke liye (jab category fetch karein toh doctors ki poori list na aaye)
+    @JsonIgnore
     private List<Doctor> doctors;
 
-    // --- Getters and Setters ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public String getName() { return name; }

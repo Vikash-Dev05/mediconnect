@@ -9,6 +9,10 @@ import org.springframework.security.web.SecurityFilterChain;
 import com.mediconnect.service.CustomUserDetailsService;
 import static org.springframework.security.config.Customizer.withDefaults;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
+import jakarta.servlet.DispatcherType;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,12 +25,22 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/register").permitAll()
-                .requestMatchers("/api/doctors/add", "/api/doctors/delete/**", "/api/patients/delete/**").hasRole("ADMIN")
+                .dispatcherTypeMatchers(DispatcherType.FORWARD, DispatcherType.ERROR).permitAll()
+                .requestMatchers("/login", "/signup", "/api/auth/register-patient", "/api/auth/register-doctor", "/api/auth/register", "/error", "/resources/**", "/static/**", "/app.js", "/uploads/**", "/pending-approval").permitAll()
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/doctor/**").hasRole("DOCTOR")
+                .requestMatchers("/patient/**").hasRole("PATIENT")
                 .anyRequest().authenticated()
             )
-            .formLogin(withDefaults())
-            .httpBasic(withDefaults());
+            .formLogin(form -> form
+                .loginPage("/login")
+                .defaultSuccessUrl("/", true)
+                .permitAll()
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/login?logout")
+                .permitAll()
+            );
 
         return http.build();
     }

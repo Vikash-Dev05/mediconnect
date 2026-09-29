@@ -12,23 +12,37 @@ public class Doctor {
 
     private String name;
     private String qualification; // e.g., MBBS, MD
-// Existing fields ke neeche add karein...
+    private String specialization; // Naya: Bimari ki specialization
+    private String degreePath; // Naya: File path/URL
+    private boolean isVerified = false; // Naya: Admin verification flag
+
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { this.specialization = specialization; }
+    public String getDegreePath() { return degreePath; }
+    public void setDegreePath(String degreePath) { this.degreePath = degreePath; }
+    public boolean isVerified() { return isVerified; }
+    public void setVerified(boolean verified) { isVerified = verified; }
+
     
     private String timingFrom; // e.g., "09:00 AM"
     private String timingTo;   // e.g., "05:00 PM"
 
-    // --- Inke Getters and Setters neeche add karein ---
+
     public String getTimingFrom() { return timingFrom; }
     public void setTimingFrom(String timingFrom) { this.timingFrom = timingFrom; }
     public String getTimingTo() { return timingTo; }
     public void setTimingTo(String timingTo) { this.timingTo = timingTo; }
 
-    // NAYA CHANGE: Specialization ab ek Category object hai
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
 
-    // --- Getters and Setters ---
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+
 
     public Long getId() {
         return id;
@@ -60,5 +74,13 @@ public class Doctor {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

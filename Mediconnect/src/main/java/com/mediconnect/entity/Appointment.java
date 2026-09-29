@@ -11,22 +11,22 @@ public class Appointment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate appointmentDate; // Kis din ki appointment hai
-    private String status; // Jaise 'Booked', 'Completed', 'Cancelled'
+    private LocalDate appointmentDate;
+    private String status; //
 
-    // SABSE IMPORTANT PART: Foreign Keys
+
     
-    // Ek appointment ka ek hi patient hota hai
+
     @ManyToOne
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
-    // Ek appointment ka ek hi doctor hota hai
+
     @ManyToOne
     @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    // --- Getters and Setters ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public LocalDate getAppointmentDate() { return appointmentDate; }

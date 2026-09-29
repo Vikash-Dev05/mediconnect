@@ -7,5 +7,5 @@ import com.mediconnect.entity.Category;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    // Bas itna hi kaafi hai
+
 }

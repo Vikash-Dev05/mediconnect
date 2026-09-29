@@ -1,5 +1,7 @@
 package com.mediconnect.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,21 +13,29 @@ import com.mediconnect.repository.UserRepository;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
+    private static final Logger log = LoggerFactory.getLogger(CustomUserDetailsService.class);
+
     @Autowired
     private UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 1. Database mein user dhoondo
-        com.mediconnect.entity.User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
 
-        // 2. Agar mil gaya, toh Spring Security wala 'User' object banakar return karo
-        // Note: Password ke aage "{noop}" laga rahe hain kyunki humne encryption nahi ki hai
+        com.mediconnect.entity.User user = userRepository.findByEmailOrPhoneNumber(username, username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email or phone: " + username));
+
+        String role = user.getRole();
+        if (role == null || role.isEmpty()) {
+            role = "PATIENT";
+        }
+        role = role.replace("ROLE_", ""); // Normalize
+
+        log.info("LOGIN-LOG: User={} | Final Role={}", user.getEmail(), role);
+
         return User.builder()
-                .username(user.getUsername())
-                .password("{noop}" + user.getPassword())
-                .roles(user.getRole())
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(role) // roles() automatically prepends ROLE_
                 .build();
     }
 }
